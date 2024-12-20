@@ -21,8 +21,10 @@ public class PostControllerV2 {
     //get all posts
     //v2/api/posts
     @GetMapping
-    public PostResponse fetchAllPost(@RequestParam(value ="pageNo", defaultValue = "0",required = false) int pageNo,
-                                     @RequestParam(value ="pageSize", defaultValue = "0",required = false)int pageSize) {
-        return this.postService.getAllPosts(pageNo, pageSize);
+    public PostResponse fetchAllPost(@RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                     @RequestParam(value = "pageSize", defaultValue = "0", required = false) int pageSize,
+                                     @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
+                                     @RequestParam(value = "sortDirection", defaultValue = "ASC", required = false) String sortDirection) {
+        return this.postService.getAllPosts(pageNo, pageSize, sortBy, sortDirection);
     }
 }
