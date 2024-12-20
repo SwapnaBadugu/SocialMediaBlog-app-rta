@@ -3,12 +3,16 @@ package com.socialmediablog.social_media_blog_app.service.impl;
 import com.socialmediablog.social_media_blog_app.dto.PostDto;
 import com.socialmediablog.social_media_blog_app.entity.PostEntity;
 import com.socialmediablog.social_media_blog_app.exception.ResourceNotFoundException;
+import com.socialmediablog.social_media_blog_app.payload.PostResponse;
 import com.socialmediablog.social_media_blog_app.repository.PostRepository;
 import com.socialmediablog.social_media_blog_app.service.PostService;
 import com.socialmediablog.social_media_blog_app.util.PostEntityMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +23,7 @@ import java.util.stream.Collectors;
 public class PostServiceImplementation implements PostService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostServiceImplementation.class);
+
 
     @Autowired
     private PostRepository postRepository;
@@ -33,6 +38,30 @@ public class PostServiceImplementation implements PostService {
             return postEntities.stream()
                     .map(postEntity -> postEntityMapper.mapPostEntityToPostDto(postEntity))
                     .collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public PostResponse getAllPosts(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Page<PostEntity> postEntityList = postRepository.findAll(pageable);
+
+        if (postEntityList != null) {
+            List<PostDto> postDtoList = postEntityList.stream()
+                    .map(postEntity -> this.postEntityMapper.mapPostEntityToPostDto(postEntity))
+                    .collect(Collectors.toList());
+
+            PostResponse postResponse = PostResponse.builder()
+                    .content(postDtoList)
+                    .pageNo(postEntityList.getNumber())
+                    .pageSize(postEntityList.getSize())
+                    .totalElements(postEntityList.getTotalElements())
+                    .totalPages(postEntityList.getTotalPages())
+                    .isLastPage(postEntityList.isLast())
+                    .build();
+
+            return postResponse;
         }
         return null;
     }
@@ -65,7 +94,7 @@ public class PostServiceImplementation implements PostService {
     @Override
     public boolean deletePostById(long postIdToBeDeleted) {
         try {
-            PostEntity postEntity= this.postRepository.findById(postIdToBeDeleted)
+            PostEntity postEntity = this.postRepository.findById(postIdToBeDeleted)
                     .orElseThrow(() -> new ResourceNotFoundException("post not found by id: " + postIdToBeDeleted));
             this.postRepository.delete(postEntity);
         } catch (Exception e) {
