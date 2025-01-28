@@ -24,6 +24,7 @@ public class PostEntityMapper {
         postEntity.setTitle(postDto.getTitle());
         postEntity.setDescription(postDto.getDescription());
         postEntity.setContent(postDto.getContent());
+
         return postEntity;
     }
 }
